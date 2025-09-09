@@ -17,5 +17,19 @@ namespace ImageCropper.Services
         public Task<Config?> GetConfigByIdAsync(int id) => _repo.GetByIdAsync(id);
         public Task AddConfigAsync(Config cfg) => _repo.AddAsync(cfg);
         public Task UpdateConfigAsync(Config cfg) => _repo.UpdateAsync(cfg);
+        public async Task SaveLogoConfigAsync(LogoConfigRequest request)
+        {
+            if (request.ScaleDown > 0.25f)
+                throw new ArgumentException("ScaleDown cannot be greater than 0.25");
+
+            var config = new Config
+            {
+                ScaleDown = request.ScaleDown,
+                LogoPosition = request.LogoPosition,
+                LogoImage = Convert.FromBase64String(request.LogoImage.Split(',')[1])
+            };
+
+            await _repo.SaveConfigAsync(config);
+        }
     }
 }

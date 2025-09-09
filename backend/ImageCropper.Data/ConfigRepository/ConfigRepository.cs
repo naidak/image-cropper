@@ -30,5 +30,23 @@ namespace ImageCropper.Data.ConfigRepository
             _db.Configs.Update(cfg);
             await _db.SaveChangesAsync();
         }
+
+        public async Task SaveConfigAsync(Config config)
+        {
+            
+            var existing = await _db.Configs.FirstOrDefaultAsync();
+            if (existing != null)
+            {
+                existing.ScaleDown = config.ScaleDown;
+                existing.LogoPosition = config.LogoPosition;
+                existing.LogoImage = config.LogoImage;
+            }
+            else
+            {
+                await _db.Configs.AddAsync(config);
+            }
+
+            await _db.SaveChangesAsync();
+        }
     }
 }

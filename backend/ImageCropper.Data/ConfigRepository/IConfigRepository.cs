@@ -13,5 +13,6 @@ namespace ImageCropper.Data.ConfigRepository
         Task<Config?> GetByIdAsync(int id);
         Task AddAsync(Config cfg);
         Task UpdateAsync(Config cfg);
+        Task SaveConfigAsync(Config config);
     }
 }

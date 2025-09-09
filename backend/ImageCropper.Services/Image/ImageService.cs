@@ -5,6 +5,7 @@ using SixLabors.ImageSharp.Drawing;
 using SixLabors.ImageSharp.Drawing.Processing;
 using ImageCropper.Services.Image;
 using ImageCropper.Models;
+using Microsoft.AspNetCore.Mvc;
 
 public class ImageService: IImageService
 {
@@ -23,8 +24,6 @@ public class ImageService: IImageService
 
         var cropped = image.Clone(ctx => ctx.Crop(rect));
 
-        
-        // Resize na 5% od cropanog dijela
         int previewWidth = Math.Max(1, (int)(image.Size.Width * 0.05));
         int previewHeight = Math.Max(1, (int)(image.Size.Height * 0.05));
 
@@ -60,4 +59,19 @@ public class ImageService: IImageService
        return ms.ToArray();
     }
 
+    public async Task SaveConfig(LogoConfigRequest request)
+    {
+        if (request.ScaleDown > 0.25)
+            throw new ArgumentException("ScaleDown cannot be greater than 0.25!");
+
+        var config = new Config
+        {
+            ScaleDown = request.ScaleDown,
+            CreatedAt = DateTime.Now,
+            LogoImage = Convert.FromBase64String(request.LogoImage.Split(",")[1]),
+            LogoPosition = request.LogoPosition
+        };
+
+
+    }
 }
