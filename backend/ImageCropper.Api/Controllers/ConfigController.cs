@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ImageCropper.Api.Controllers
 {
+    [ApiController]
+    [Route("api/[controller]")]
     public class ConfigController : ControllerBase
     {
         private readonly ConfigService _configService;
@@ -13,7 +15,7 @@ namespace ImageCropper.Api.Controllers
         {
             _configService = configService;
         }
-        [HttpPost("config")]
+        [HttpPost("save-config")]
         public async Task<IActionResult> SaveConfig([FromBody] LogoConfigRequest request)
         {
             try
@@ -26,6 +28,17 @@ namespace ImageCropper.Api.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpGet("get-config")]
+        public async Task<IActionResult> GetConfig()
+        {
+            var config = await _configService.GetLogoConfigAsync();
+            if (config == null)
+                return NotFound("No configuration found");
+
+            return Ok(config);
+        }
+
 
     }
 }

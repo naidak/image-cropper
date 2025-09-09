@@ -31,5 +31,18 @@ namespace ImageCropper.Services
 
             await _repo.SaveConfigAsync(config);
         }
+        public async Task<LogoConfigResponse?> GetLogoConfigAsync()
+        {
+            var config = await _repo.GetConfigAsync();
+            if (config == null) return null;
+
+            return new LogoConfigResponse
+            {
+                ScaleDown = config.ScaleDown,
+                LogoPosition = config.LogoPosition,
+                LogoImage = $"data:image/png;base64,{Convert.ToBase64String(config.LogoImage)}"
+            };
+        }
+
     }
 }

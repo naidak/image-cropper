@@ -48,5 +48,8 @@ namespace ImageCropper.Data.ConfigRepository
 
             await _db.SaveChangesAsync();
         }
+        public async Task<Config?> GetConfigAsync() => await _db.Configs.FirstOrDefaultAsync();
+        
+
     }
 }

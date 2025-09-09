@@ -12,6 +12,6 @@ namespace ImageCropper.Models
     public class ImagePreviewRequest
     {
         public IFormFile Image { get; set; } = null!;
-        public List<System.Drawing.PointF> CropCoordinates { get; set; } = new(); // polygon, min 3 points
+        public List<System.Drawing.PointF> CropCoordinates { get; set; } = new();
     }
 }
