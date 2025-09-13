@@ -1,10 +1,11 @@
+using Microsoft.EntityFrameworkCore;
 using ImageCropper.Data;
 using ImageCropper.Data.ConfigRepository;
 using ImageCropper.Services;
 using ImageCropper.Services.Image;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
 
 // DATABASE
 builder.Services.AddDbContext<AppDbContext>(opt =>
@@ -32,13 +33,17 @@ builder.Services.AddControllers().AddJsonOptions(opts =>
     opts.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
 });
 
-
 var app = builder.Build();
 app.UseCors("AllowAll");
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.MapControllers();
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
 
+app.MapControllers();
 
 app.Run();

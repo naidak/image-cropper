@@ -1,0 +1,50 @@
+services:
+  backend:
+    build: ./backend
+    container_name: imagecropper-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - ASPNETCORE_URLS=http://+:5000
+      - ConnectionStrings__Default=Server=sqlserver,1433;Database=ImageCropperDb;User Id=sa;Password=User123!;TrustServerCertificate=True;
+    volumes:
+      - nuget_cache:/root/.nuget/packages
+    depends_on:
+      - sqlserver
+    networks:
+      - app-network
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: imagecropper-sqlserver
+    environment:
+      SA_PASSWORD: "User123!"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'User123!' -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+
+  frontend:
+    build: ./frontend
+    container_name: imagecropper-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://backend:5000
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+volumes:
+  nuget_cache:
+
+networks:
+  app-network:
+    driver: bridge

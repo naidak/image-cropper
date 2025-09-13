@@ -7,10 +7,12 @@ import { Button } from "antd";
 const ImageCropper = () => {
   const [image, setImage] = useState<string | null>(null);
   const [crop, setCrop] = useState<Crop>({
-    unit: "px", x: 50, y: 50, width: 200, height: 200
+    unit: "px", x: 50, y: 50, width: 100, height: 100
   });
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewSize, setPreviewSize] = useState<{w: number, h: number} | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
+  const API_BASE = import.meta.env.VITE_API_URL;
 
   const onImageLoaded = (img: HTMLImageElement) => {
     imgRef.current = img;
@@ -27,7 +29,6 @@ const ImageCropper = () => {
   const buildCropPayload = () => {
     if (!image || !imgRef.current || !crop.width || !crop.height) return null;
 
-    // scale from rendered to natural resolution
     const scaleX = imgRef.current.naturalWidth / imgRef.current.width;
     const scaleY = imgRef.current.naturalHeight / imgRef.current.height;
 
@@ -43,30 +44,37 @@ const ImageCropper = () => {
   };
 
   const handlePreview = async () => {
-    const body = buildCropPayload();
-    if (!body) return;
+  const body = buildCropPayload();
+  if (!body) return;
 
-    const res = await fetch("http://localhost:7052/api/image/preview", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
+  const res = await fetch(`${API_BASE}/api/image/preview`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
 
-    if (!res.ok) {
-      console.error("Preview failed:", res.status, await res.text());
-      return;
-    }
+  if (!res.ok) {
+    console.error("Preview failed:", res.status, await res.text());
+    return;
+  }
 
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    setPreviewUrl(url); // display preview
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+
+  const img = new Image();
+  img.onload = () => {
+    setPreviewSize({ w: img.width, h: img.height }); 
+    setPreviewUrl(url);
   };
+  img.src = url;
+};
+
 
  const handleGenerate = async () => {
   const body = buildCropPayload();
   if (!body) return;
 
-  const res = await fetch("http://localhost:7052/api/image/generate", {
+  const res = await fetch(`${API_BASE}/api/image/generate`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -80,15 +88,14 @@ const ImageCropper = () => {
   const blob = await res.blob();
   const url = URL.createObjectURL(blob);
 
-  // Create a link and trigger download
   const link = document.createElement("a");
   link.href = url;
-  link.download = "cropped.png"; // file name for download
+  link.download = "cropped.png"; 
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 
-  URL.revokeObjectURL(url); // cleanup
+  URL.revokeObjectURL(url); 
 };
 
 
@@ -97,7 +104,7 @@ const ImageCropper = () => {
       <input type="file" accept="image/*" onChange={handleFileChange} />
 
       {image && (
-        <div style={{ width: 500, height: 400 }}>
+        <div>
           <ReactCrop
             crop={crop}
             onChange={(c) => setCrop(c)}
@@ -117,12 +124,14 @@ const ImageCropper = () => {
         </Button>
       </div>
 
-      {previewUrl && (
-        <div style={{ marginTop: 16 }}>
-          <h3>Preview (5% size)</h3>
-          <img src={previewUrl} alt="Preview" />
-        </div>
-      )}
+      {previewUrl && previewSize && (
+  <img
+    src={previewUrl}
+    alt="Preview"
+    width={previewSize.w}
+    height={previewSize.h}
+  />
+)}
     </div>
   );
 };

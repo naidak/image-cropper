@@ -9,11 +9,10 @@ namespace ImageCropper.Data.ConfigRepository
 {
     public interface IConfigRepository
     {
-        Task<Config?> GetLastAsync();
-        Task<Config?> GetByIdAsync(int id);
-        Task AddAsync(Config cfg);
-        Task UpdateAsync(Config cfg);
         Task SaveConfigAsync(Config config);
         Task<Config?> GetConfigAsync();
+        Task<Config> GetByIdAsync(int id);
+        Task UpdateAsync(Config config);
+        Task DeleteLogoAsync(int id);
     }
 }

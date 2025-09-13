@@ -1,91 +1,172 @@
-import { useEffect, useState } from "react";
-import { Form, InputNumber, Select, Button, Upload, message, Image } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
+import React, { useState, useEffect } from "react";
+import { Button, Input, Select, Upload, message, Modal, Card, Form } from "antd";
+import { UploadOutlined, DeleteOutlined } from "@ant-design/icons";
 
 const { Option } = Select;
 
-const LogoConfig = () => {
-  const [form] = Form.useForm();
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
-
-  // Load existing config on mount
+const LogoConfig: React.FC = () => {
+  const [scaleDown, setScaleDown] = useState<number>(0.1);
+  const [logoPosition, setLogoPosition] = useState<string>("bottom-right");
+  const [logoImage, setLogoImage] = useState<string | null>(null);
+  const [id, setId] = useState<number | null>(null);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const API_BASE = import.meta.env.VITE_API_URL;
   useEffect(() => {
-    fetch("http://localhost:7052/api/Config/get-config")
-      .then(res => {
-        if (!res.ok) throw new Error("No config found");
-        return res.json();
-      })
-      .then(data => {
-        form.setFieldsValue({
-          scaleDown: data.scaleDown,
-          logoPosition: data.logoPosition
-        });
-        setLogoPreview(data.logoImage);
-      })
-      .catch(() => {});
-  }, [form]);
+    const fetchConfig = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/Config/get-config`);
+        if (res.ok) {
+          const data = await res.json();
+          setId(data.id);
+          setScaleDown(data.scaleDown);
+          setLogoPosition(data.logoPosition);
+          setLogoImage(`${data.logoImage}`);
+        }
+      } catch (err) {
+        console.error("Failed to fetch config", err);
+      }
+    };
+    fetchConfig();
+  }, []);
 
   const handleUpload = (file: File) => {
     const reader = new FileReader();
-    reader.onload = () => setLogoPreview(reader.result as string);
+    reader.onload = () => {
+      setLogoImage(reader.result as string);
+    };
     reader.readAsDataURL(file);
-    return false; // spriječi automatski upload
+    return false;
   };
 
-  const onFinish = async (values: any) => {
-    if (!logoPreview) {
-      message.error("Please upload a logo.");
+  const handleSave = async () => {
+    if (!logoImage) {
+      message.error("Please upload a logo first");
       return;
     }
 
-    const payload = {
-      scaleDown: values.scaleDown,
-      logoPosition: values.logoPosition,
-      logoImage: logoPreview
-    };
+    const payload = { scaleDown, logoPosition, logoImage };
+    try {
+      let res: Response;
+      if (id !== null) {
+        res = await fetch(`${API_BASE}/api/Config/update/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      } else {
+        res = await fetch(`${API_BASE}/api/Config/save-config`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      }
 
-    const res = await fetch("http://localhost:7052/api/Config/save-config", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+      if (res.ok) {
+        message.success("Configuration saved successfully");
+      } else {
+        const errorText = await res.text();
+        message.error(`Error: ${errorText}`);
+      }
+    } catch (err) {
+      console.error("Save failed", err);
+      message.error("Failed to save configuration");
+    }
+  };
 
-    if (res.ok) {
-      message.success("Configuration saved successfully!");
-    } else {
-      const err = await res.text();
-      message.error("Error: " + err);
+  const handleDeleteLogo = async () => {
+    if (id === null) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/api/Config/delete-logo/${id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        setLogoImage(null);
+        message.success("Logo deleted successfully");
+      } else {
+        const errorText = await res.text();
+        message.error(`Error: ${errorText}`);
+      }
+    } catch (err) {
+      console.error("Delete failed", err);
+      message.error("Failed to delete logo");
     }
   };
 
   return (
-    <Form form={form} layout="vertical" onFinish={onFinish}>
-      <Form.Item label="Scale Down (max 0.25)" name="scaleDown" rules={[{ required: true }]}>
-        <InputNumber min={0.01} max={0.25} step={0.01} />
-      </Form.Item>
+    <Card title="Logo Configuration" bordered={false} style={{ maxWidth: 500, margin: "0 auto" }}>
+      <Form layout="vertical">
+        <Form.Item label="Scale Down (max 0.25)">
+          <Input
+            type="number"
+            min={0}
+            max={0.25}
+            step={0.01}
+            value={scaleDown}
+            onChange={(e) => setScaleDown(parseFloat(e.target.value))}
+          />
+        </Form.Item>
 
-      <Form.Item label="Logo Position" name="logoPosition" rules={[{ required: true }]}>
-        <Select>
-          <Option value="top-left">Top Left</Option>
-          <Option value="top-right">Top Right</Option>
-          <Option value="bottom-left">Bottom Left</Option>
-          <Option value="bottom-right">Bottom Right</Option>
-        </Select>
-      </Form.Item>
+        <Form.Item label="Logo Position">
+          <Select
+            value={logoPosition}
+            onChange={setLogoPosition}
+            style={{ width: "100%" }}
+          >
+            <Option value="top-left">Top Left</Option>
+            <Option value="top-right">Top Right</Option>
+            <Option value="bottom-left">Bottom Left</Option>
+            <Option value="bottom-right">Bottom Right</Option>
+          </Select>
+        </Form.Item>
 
-      <Form.Item label="Upload Logo">
-        <Upload beforeUpload={handleUpload} maxCount={1} accept="image/png">
-          <Button icon={<UploadOutlined />}>Select Logo</Button>
-        </Upload>
-        {logoPreview && <Image src={logoPreview} alt="logo preview" width={100} style={{ marginTop: 10 }} />}
-      </Form.Item>
+        <Form.Item label="Logo Image">
+          <Upload beforeUpload={handleUpload} showUploadList={false}>
+            <Button icon={<UploadOutlined />}>Upload Logo</Button>
+          </Upload>
+<br />
+          {logoImage && (
+            <div style={{ position: "relative", display: "inline-block", marginTop: 12 }}>
+              <img
+                src={logoImage}
+                alt="Logo Preview"
+                style={{ maxWidth: 120, border: "1px solid #ddd", borderRadius: 4 }}
+                onClick={() => setIsModalVisible(true)}
+              />
+              <DeleteOutlined
+                onClick={handleDeleteLogo}
+                style={{
+                  position: "absolute",
+                  top: 5,
+                  right: 5,
+                  fontSize: 15,
+                  color: "blue",
+                  cursor: "pointer",
+                  backgroundColor: "white",
+                  borderRadius: "50%",
+                  padding: 2,
+                }}
+              />
+            </div>
+          )}
+        </Form.Item>
 
-      <Form.Item>
-        <Button type="primary" htmlType="submit">
-          Save
-        </Button>
-      </Form.Item>
-    </Form>
+        <Form.Item>
+          <Button type="primary" onClick={handleSave} block>
+            {id ? "Update Config" : "Save Config"}
+          </Button>
+        </Form.Item>
+      </Form>
+
+      <Modal
+        open={isModalVisible}
+        footer={null}
+        onCancel={() => setIsModalVisible(false)}
+      >
+        <img src={logoImage!} alt="Logo Large Preview" style={{ width: "100%" }} />
+      </Modal>
+    </Card>
   );
 };
 

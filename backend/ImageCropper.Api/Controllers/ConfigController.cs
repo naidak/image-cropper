@@ -38,7 +38,25 @@ namespace ImageCropper.Api.Controllers
 
             return Ok(config);
         }
-
+        [HttpPut("update/{id}")]
+        public async Task<IActionResult> UpdateConfig(int id, [FromBody] LogoConfigRequest request)
+        {
+            try
+            {
+                await _configService.UpdateLogoConfigAsync(id, request);
+                return Ok($"Configuration {id} updated successfully.");
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+        [HttpDelete("delete-logo/{id}")]
+        public async Task<IActionResult> DeleteLogo(int id)
+        {
+            await _configService.DeleteLogoAsync(id);
+            return NoContent();
+        }
 
     }
 }

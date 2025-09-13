@@ -13,6 +13,6 @@ namespace ImageCropper.Services.Image
     {
         public Task<byte[]> GeneratePreviewAsync(ImageGenerateRequest request);
         public Task<byte[]> GenerateCroppedImageAsync(ImageGenerateRequest request);
-        public Task SaveConfig(LogoConfigRequest request);
+      
     }
 }
