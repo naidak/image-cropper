@@ -21,7 +21,10 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+
+    /* Vite types */
+    "types": ["vite/client"]
   },
-  "include": ["src"]
+  "include": ["src", "src/vite-env.d.ts"]
 }

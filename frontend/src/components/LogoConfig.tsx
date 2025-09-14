@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import * as React from "react";
+import { useState, useEffect } from "react";
 import { Button, Input, Select, Upload, message, Modal, Card, Form } from "antd";
 import { UploadOutlined, DeleteOutlined } from "@ant-design/icons";
 
@@ -104,7 +105,7 @@ const LogoConfig: React.FC = () => {
             max={0.25}
             step={0.01}
             value={scaleDown}
-            onChange={(e) => setScaleDown(parseFloat(e.target.value))}
+            onChange={(e:any) => setScaleDown(parseFloat(e.target.value))}
           />
         </Form.Item>
 
