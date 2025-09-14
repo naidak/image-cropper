@@ -20,7 +20,7 @@ const LogoConfig: React.FC = () => {
           setId(data.id);
           setScaleDown(data.scaleDown);
           setLogoPosition(data.logoPosition);
-          setLogoImage(`${data.logoImage}`);
+          setLogoImage(data.logoImage ?? null);
         }
       } catch (err) {
         console.error("Failed to fetch config", err);
@@ -122,10 +122,20 @@ const LogoConfig: React.FC = () => {
         </Form.Item>
 
         <Form.Item label="Logo Image">
-          <Upload beforeUpload={handleUpload} showUploadList={false}>
+          <Upload
+            accept="image/png"
+            beforeUpload={(file) => {
+              if (file.type !== "image/png") {
+                message.error("Only PNG files are allowed!");
+                return Upload.LIST_IGNORE; // spriječava upload
+              }
+              return handleUpload(file);
+            }}
+            showUploadList={false}
+          >
             <Button icon={<UploadOutlined />}>Upload Logo</Button>
           </Upload>
-<br />
+          <br />
           {logoImage && (
             <div style={{ position: "relative", display: "inline-block", marginTop: 12 }}>
               <img
@@ -151,6 +161,7 @@ const LogoConfig: React.FC = () => {
             </div>
           )}
         </Form.Item>
+
 
         <Form.Item>
           <Button type="primary" onClick={handleSave} block>

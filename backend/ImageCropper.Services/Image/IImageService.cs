@@ -1,6 +1,7 @@
 ﻿using ImageCropper.Models;
 using Microsoft.AspNetCore.Mvc;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,8 @@ namespace ImageCropper.Services.Image
     {
         public Task<byte[]> GeneratePreviewAsync(ImageGenerateRequest request);
         public Task<byte[]> GenerateCroppedImageAsync(ImageGenerateRequest request);
-      
+        public void ApplyLogoOverlay(Image<Rgba32> cropped);
+
+
     }
 }

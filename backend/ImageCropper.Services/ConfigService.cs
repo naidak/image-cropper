@@ -37,7 +37,9 @@ namespace ImageCropper.Services
                 Id = config.Id,
                 ScaleDown = config.ScaleDown,
                 LogoPosition = config.LogoPosition,
-                LogoImage = $"data:image/png;base64,{Convert.ToBase64String(config.LogoImage)}"
+                LogoImage = config.LogoImage != null
+                    ? $"data:image/png;base64,{Convert.ToBase64String(config.LogoImage)}"
+                    : null
             };
         }
 

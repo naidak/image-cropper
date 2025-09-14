@@ -17,7 +17,7 @@ namespace ImageCropper.Models
     }
     public class ImageGenerateRequest
     {
-        public string ImageBase64 { get; set; }
-        public CropData Crop { get; set; }
+        public string? ImageBase64 { get; set; }
+        public CropData? Crop { get; set; }
     }
 }
