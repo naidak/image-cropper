@@ -1,65 +1,70 @@
 # ImageCropper
 
-ImageCropper je aplikacija koja omogućava upload, crop i spremanje slika.  
-Sastoji se od **frontend-a (React + Vite)**, **backend-a (ASP.NET Core Web API)** i **SQL Server baze**.  
-Svi dijelovi se pokreću pomoću **Docker Compose**.
+ImageCropper is an application that enables uploading, cropping, and saving images.  
+It consists of a **frontend (React + Vite)**, **backend (ASP.NET Core Web API)**, and **SQL Server database**.  
+All components are orchestrated with **Docker Compose**.
+
 ---
 
-# 1. Preduvjeti
+# 1. Prerequisites
 
-Prije pokretanja projekta, potrebno je imati instalirano:
+Before running the project, make sure you have installed:
 - [Docker](https://www.docker.com/get-started) (Docker Engine + Docker Compose)
 - [Git](https://git-scm.com/downloads)
 
 ---
 
-# 2. Kloniranje repozitorija
+# 2. Clone the Repository
 
 ```bash
 git clone https://github.com/naidak/image-cropper.git
 cd image-cropper
 ```
+
 ---
 
-# 3. Build i pokretanje
+# 3. Build and Run
 
-Aplikacija se pokreće pomoću Docker Compose: 
+The application is started with Docker Compose: 
 
 ```bash
 docker-compose up --build
 ```
-ili
+or
 ```bash
 docker-compose build
 docker-compose up
 ```
-Ovo će:
-- buildati i pokrenuti frontend na portu 3000
-- buildati i pokrenuti backend na portu 5000
-- pokrenuti SQL Server na portu 1433
-- automatski odraditi migracije baze prilikom podizanja backend kontejnera
+
+This will:
+- build and run the frontend on port 3000
+- build and run the backend on port 5000
+- start SQL Server on port 1433
+- automatically run database migrations when the backend container is started
   
 ---
 
-# 4. Pristup aplikaciji
+# 4. Access the Application
 
-Frontend: http://localhost:3000
-Backend API (Swagger): http://localhost:5000/swagger
+- Frontend: [http://localhost:3000](http://localhost:3000)  
+- Backend API (Swagger): [http://localhost:5000/swagger](http://localhost:5000/swagger)
 
 ---
-# 5. Testiranje
 
-- Pokreni aplikaciju (docker compose up).
-- Otvori Swagger na http://localhost:5000/swagger i testiraj API endpoint-e.
-- Kroz frontend (React app) testiraj upload i crop slike.
+# 5. Testing
+
+- Start the application (`docker compose up`).
+- Open Swagger at [http://localhost:5000/swagger](http://localhost:5000/swagger) and test the API endpoints.
+- Use the frontend (React app) to test image upload and cropping.
 
 ---
 
 # 6. Troubleshooting
-Ako neki kontejner ne krene, provjeri logove:
+
+If a container does not start, check the logs:
 ```bash
-docker compose logs <ime_kontejnera>
+docker compose logs <container_name>
 ```
-Provjeri da li portovi 3000, 8080 i 1433 nisu zauzeti na tvom računaru.
+Make sure that ports 3000, 5000, and 1433 are not already in use on your machine.
 
 ---
